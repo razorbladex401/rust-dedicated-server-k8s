@@ -1,0 +1,106 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rust
+  namespace: rust
+  labels:
+    app: rust
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rust
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: rust
+    spec:
+      securityContext:
+      volumes:
+        - name: rust-data
+          persistentVolumeClaim:
+            claimName: rust-data-pvc
+        - name: ssh-config
+          persistentVolumeClaim:
+            claimName: ssh-config-pvc
+      containers:
+        - name: rust
+          image: razorbladex401/rust:latest
+          imagePullPolicy: Always
+          volumeMounts:
+          - mountPath: "/home/steam/rust"
+            name: rust-data
+          env:
+            - name: GAME
+              value: rust
+            - name: HOME
+              value: /home/steam
+            - name: APPID
+              value: "258550"
+            - name: STEAMACCOUNT
+              value: anonymous
+            - name: TICKRATE
+              value: "30"
+            - name: PORT
+              value: "28015"
+            - name: RCON
+              value: "28016"
+            - name: HOSTNAME
+              value: "YOUR SERVER NAME"
+            - name: IDENTITY
+              value: "YOUR_SERVER_IDENTITY"
+            - name: MAXPLAYERS
+              value: "30"
+            - name: WORLDSIZE
+              value: "3000"
+            - name: SEED
+              value: "793197"
+            - name: SAVEINTERVAL
+              value: "600"
+            - name: RCONPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rust-rcon-pass
+                  key: USER_PASSWORD
+        - name: openssh-server
+          image: lscr.io/linuxserver/openssh-server:latest
+          imagePullPolicy: Always
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "America/New_York"
+            - name: SUDO_ACCESS
+              value: "false"
+            - name: PASSWORD_ACCESS
+              value: "true"
+            - name: USER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: ssh-sec
+                  key: USER_NAME
+            - name: USER_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: ssh-sec
+                  key: USER_PASSWORD
+          volumeMounts:
+          - mountPath: "/config"
+            name: ssh-config
+          - mountPath: "/home/steam/rust"
+            name: rust-data
+          ports:
+            - name: ssh
+              containerPort: 2222
+              protocol: TCP
+            - name: rcon
+              containerPort: 28016
+              protocol: UDP
+            - name: steam
+              containerPort: 28015
+              protocol: UDP
