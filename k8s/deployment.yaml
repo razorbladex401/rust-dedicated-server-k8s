@@ -100,7 +100,10 @@ spec:
               protocol: TCP
             - name: rcon
               containerPort: 28016
-              protocol: UDP
+              protocol: TCP
             - name: steam
               containerPort: 28015
               protocol: UDP
+            - name: rustplus
+              containerPort: 28083
+              protocol: TCP

@@ -13,10 +13,6 @@ spec:
       port: 28015
       protocol: UDP
       targetPort: 28015
-    - name: rcon
-      port: 28016
-      protocol: UDP
-      targetPort: 28016
   selector:
     app: rust
   type: LoadBalancer
@@ -39,6 +35,10 @@ spec:
       port: 28016
       protocol: TCP
       targetPort: 28016
+    - name: rustplus
+      port: 28083
+      protocol: TCP
+      targetPort: 28083
   selector:
     app: rust
   type: LoadBalancer
